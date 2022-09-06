@@ -33,11 +33,11 @@ const ExaminerSchema = mongoose.Schema({
         default: 'examiner',
     },
     examsCreated: {
-        type: Array,
+        type: [mongoose.Types.ObjectId],
         default: []
     },
     regStudents: {
-        type: Array,
+        type: [mongoose.Types.ObjectId],
         default: []
     }
 })

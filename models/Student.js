@@ -33,7 +33,9 @@ const StudentSchema = mongoose.Schema({
         default: 'student',
     },
     exams: [{
-        examID: String,
+        examID: {
+            type: mongoose.Types.ObjectId,
+        },
         isCompleted: {
             type: Boolean,
             default: false,
