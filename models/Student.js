@@ -29,7 +29,7 @@ const StudentSchema = mongoose.Schema({
     },
     userType: {
         type: String,
-        enum: ['student', 'teacher'],
+        enum: ['student', 'Examiner'],
         default: 'student',
     },
     exams: [{
