@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const nodemailer = require('nodemailer');
 
 const StudentSchema = mongoose.Schema({
     name: {
@@ -22,6 +23,7 @@ const StudentSchema = mongoose.Schema({
         minlength: [6, 'Password cannot be less than 6 characters'],
     },
     isActivated: {
+        type: Boolean,
         default: false
     },
     userType: {
@@ -39,5 +41,31 @@ const StudentSchema = mongoose.Schema({
         default: []
     }]
 })
+
+StudentSchema.methods.sendVerificationEmail = async function (token) {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        secure: true,
+        auth: {
+            user: process.env.SERVER_EMAIL,
+            pass: process.env.SERVER_PASS
+        }
+    });
+
+    const mailOptions = {
+        from: process.env.SERVER_EMAIL,
+        to: this.email,
+        subject: 'Welcome, Please Verify Your Email',
+        html: `https://localhost:3000/activate/${token}`
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+        }
+    });
+}
 
 module.exports = mongoose.model('Student', StudentSchema);
