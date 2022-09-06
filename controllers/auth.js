@@ -2,7 +2,8 @@ const Student = require('../models/Student');
 
 const register = async (req, res) => {
     const { name, email, password, userType } = req.body;
-    res.send('register controler')
+    const user = await Student.create({ name, email, password, userType });
+    res.status(201).json({ user });
 }
 
 const login = async (req, res) => {

@@ -1,12 +1,15 @@
 require('dotenv').config();
+require('express-async-errors');
 const express = require('express');
 const app = express();
 
-const authRoute = require('./routes/auth');
 const connectDB = require('./db/connect');
+const authRoute = require('./routes/auth');
+const ErrorHandlerMiddleware = require('./middleware/error-handler');
 
 app.use(express.json());
 app.use('/api/v1/auth', authRoute);
+app.use(ErrorHandlerMiddleware)
 
 const start = async () => {
     try {
