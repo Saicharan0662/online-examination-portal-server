@@ -1,7 +1,7 @@
 const Student = require('../models/Student');
 const jwt = require('jsonwebtoken');
 const { StatusCodes } = require('http-status-codes');
-const UnauthenticatedError = require('../errors')
+const { UnauthenticatedError } = require('../errors')
 
 const register = async (req, res) => {
     const { name, email, password, userType } = req.body;
@@ -21,7 +21,7 @@ const activate = async (req, res) => {
             runValidators: true
         });
     } catch (error) {
-        throw UnauthenticatedError("Invalid Token");
+        throw new UnauthenticatedError("Invalid Token");
     }
     res.status(StatusCodes.CREATED).json({ user: { name: user.name, email: user.email }, clientToken })
 }

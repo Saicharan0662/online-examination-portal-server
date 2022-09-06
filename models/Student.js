@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcrypt');
 
 const StudentSchema = mongoose.Schema({
     name: {
@@ -40,6 +41,12 @@ const StudentSchema = mongoose.Schema({
 
         default: []
     }]
+})
+
+StudentSchema.pre('save', async function (next) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
 })
 
 StudentSchema.methods.sendVerificationEmail = async function (token) {
