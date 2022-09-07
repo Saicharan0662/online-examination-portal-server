@@ -6,16 +6,18 @@ const { UnauthenticatedError, BadRequestError } = require('../errors')
 
 const register = async (req, res) => {
     const { name, email, password, userType } = req.body;
-    const token = jwt.sign({ name, email, password }, process.env.JWT_SECRET, { expiresIn: '20m' })
-    let user;
+
+    let user, token;
     if (userType === 'student') {
         user = await Student.create({ name, email, password, userType });
+        token = user.createJWT();
     } else {
         user = await Examiner.create({ name, email, password, userType });
+        token = user.createJWT();
     }
 
     user.sendVerificationEmail(token)
-    res.status(StatusCodes.ACCEPTED).json({ user: { name: user.name, email: user.email }, msg: 'Please confirm your email' })
+    res.status(StatusCodes.ACCEPTED).json({ user: { userID: user._id, name: user.name, email: user.email }, msg: 'Please confirm your email' })
 }
 
 const activate = async (req, res) => {
@@ -37,19 +39,22 @@ const activate = async (req, res) => {
     } catch (error) {
         throw new UnauthenticatedError("Invalid Token");
     }
-    res.status(StatusCodes.CREATED).json({ user: { name: user.name, email: user.email }, clientToken })
+    res.status(StatusCodes.CREATED).json({ user: { userID: user._id, name: user.name, email: user.email }, clientToken })
 }
 
 const login = async (req, res) => {
-    const { email, password } = req.body;
-    const user = await Student.findOne({ email });
+    const { email, password, userType } = req.body;
+    let user;
+    if (userType === 'student')
+        user = await Student.findOne({ email });
+    else user = await Examiner.findOne({ email })
     if (!email || !password)
         throw new BadRequestError(`Please provide email and password`)
     if (!user)
         throw new UnauthenticatedError(`Invalid credentials`)
 
     if (!user.isActivated) {
-        const token = jwt.sign({ email, password }, process.env.JWT_SECRET, { expiresIn: '20m' })
+        let token = user.createJWT();
         user.sendVerificationEmail(token)
         res.status(StatusCodes.UNAUTHORIZED).json({ msg: `Please verify your email, verification link sent to the email ${user.email}` })
     }
@@ -59,8 +64,8 @@ const login = async (req, res) => {
         throw new UnauthenticatedError("Invalid Credentials");
     }
 
-    const token = jwt.sign({ email, password }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_LIFETIME })
-    res.status(StatusCodes.OK).json({ user: { name: user.name, email: user.email }, token })
+    const token = jwt.sign({ userID: user._id, email, password }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_LIFETIME })
+    res.status(StatusCodes.OK).json({ user: { userID: user._id, name: user.name, email: user.email }, token })
 }
 
 module.exports = {

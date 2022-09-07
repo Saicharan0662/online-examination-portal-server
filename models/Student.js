@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const StudentSchema = mongoose.Schema({
     name: {
@@ -50,6 +51,10 @@ StudentSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, salt);
     next();
 })
+
+StudentSchema.methods.createJWT = function () {
+    return jwt.sign({ userID: this._id, email: this.email, password: this.password }, process.env.JWT_SECRET, { expiresIn: '20m' });
+}
 
 StudentSchema.methods.matchPasswords = async function (clientPassword) {
     return await bcrypt.compare(clientPassword, this.password);

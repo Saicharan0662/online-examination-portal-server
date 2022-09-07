@@ -8,6 +8,10 @@ const ExamSchema = mongoose.Schema({
         maxLength: [30, 'Exam name cannot be more than 30 characters'],
         minLength: [3, 'Exam name cannot be less than 3 characters'],
     },
+    description: {
+        type: String,
+        required: [true, 'Please provide a description'],
+    },
     duration: {
         type: Number,
         required: [true, 'Please provide a duration of exam'],
