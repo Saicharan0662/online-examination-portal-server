@@ -1,6 +1,7 @@
 const Student = require('../models/Student');
 const Examiner = require('../models/Examiner');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const { StatusCodes } = require('http-status-codes');
 const { UnauthenticatedError, BadRequestError } = require('../errors')
 
@@ -68,8 +69,52 @@ const login = async (req, res) => {
     res.status(StatusCodes.OK).json({ user: { userID: user._id, name: user.name, email: user.email }, token })
 }
 
+const forgotPassword = async (req, res) => {
+    const { email, userType } = req.body;
+    let user;
+    if (userType === 'student') user = await Student.findOne({ email });
+    else user = await Examiner.findOne({ email });
+
+    if (!user) throw new UnauthenticatedError("Invalid Email");
+    const token = user.createJWT();
+
+    user.sendResetPasswordEmail(token);
+    res.status(StatusCodes.OK).json({ msg: `Reset password link sent to the email ${user.email}` })
+}
+
+const changePassword = async (req, res) => {
+    const { newPassword, clientToken, userType } = req.body;
+    let user;
+    try {
+        const payload = jwt.verify(clientToken, process.env.JWT_SECRET)
+        const salt = await bcrypt.genSalt(10)
+        hashedPassword = await bcrypt.hash(newPassword, salt)
+        if (userType === 'student') {
+            user = await Student.findOneAndUpdate({ email: payload.email }, { password: hashedPassword }, {
+                new: true,
+                runValidators: true
+            });
+        }
+        else {
+            user = await Examiner.findOneAndUpdate({ email: payload.email }, { password: hashedPassword }, {
+                new: true,
+                runValidators: true
+            })
+        }
+    } catch (error) {
+        // console.log(error)
+        throw new UnauthenticatedError("Not Authorized");
+    }
+
+    const token = jwt.sign({ userID: user._id, email: user.email, password: user.password }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_LIFETIME })
+
+    res.status(StatusCodes.OK).json({ user: { userID: user._id, name: user.name, email: user.email }, token, msg: "Password changed successfully" })
+}
+
 module.exports = {
     register,
     login,
-    activate
+    activate,
+    forgotPassword,
+    changePassword
 }

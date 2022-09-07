@@ -57,6 +57,32 @@ ExaminerSchema.methods.matchPasswords = async function (clientPassword) {
     return await bcrypt.compare(clientPassword, this.password);
 }
 
+ExaminerSchema.methods.sendResetPasswordEmail = async function (token) {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        secure: true,
+        auth: {
+            user: process.env.SERVER_EMAIL,
+            pass: process.env.SERVER_PASS
+        }
+    });
+
+    const mailOptions = {
+        from: process.env.SERVER_EMAIL,
+        to: this.email,
+        subject: 'Reset your password',
+        html: `https://localhost:3000/reset-password/${token}`
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.error(error);
+        } else {
+            // console.log('Email sent: ' + info.response);
+        }
+    });
+}
+
 ExaminerSchema.methods.sendVerificationEmail = async function (token) {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
