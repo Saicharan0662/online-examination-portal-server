@@ -4,8 +4,13 @@ const { StatusCodes } = require('http-status-codes');
 
 const createExam = async (req, res) => {
     const { name, description, duration, topics, questions } = req.body;
-    console.log(name, description, duration, topics, questions, req.user);
-    res.send('create exam');
+
+    if (!name || !description || !duration || !topics || !questions)
+        throw new BadRequestError("Please provide the required fields");
+
+    const exam = await Exam.create({ name, description, duration, topics, questions, createdBy: req.user.userID });
+
+    res.status(StatusCodes.CREATED).json({ exam, msg: "success" })
 }
 
 module.exports = {

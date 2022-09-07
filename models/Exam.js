@@ -20,7 +20,7 @@ const ExamSchema = mongoose.Schema({
         type: Array,
         required: [true, 'Please provide a topics of exam'],
     },
-    CreatedBy: {
+    createdBy: {
         type: mongoose.Types.ObjectId,
         ref: 'Examiner',
         required: [true, 'Please provide a examiner id'],
@@ -35,8 +35,6 @@ const ExamSchema = mongoose.Schema({
         answer: {
             type: String,
         },
-
-        default: []
     }]
 }, { timestamps: true })
 
