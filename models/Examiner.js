@@ -71,7 +71,7 @@ ExaminerSchema.methods.sendResetPasswordEmail = async function (token) {
         from: process.env.SERVER_EMAIL,
         to: this.email,
         subject: 'Reset your password',
-        html: `https://localhost:3000/reset-password/${token}`
+        html: `http://localhost:3000/reset-password/${token}`
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
