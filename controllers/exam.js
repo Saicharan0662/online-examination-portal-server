@@ -17,6 +17,30 @@ const createExam = async (req, res) => {
     res.status(StatusCodes.CREATED).json({ exam, msg: "success" })
 }
 
+const getExams = async (req, res) => {
+    const exams = await Exam.find({ createdBy: req.user.userID });
+    res.status(StatusCodes.OK).json({ exams, msg: "success" });
+}
+
+const deleteExam = async (req, res) => {
+    const exam = await Exam.findByIdAndDelete({ _id: req.params.id });
+    const updatedExaminer = await Examiner.updateMany(
+        { _id: exam.createdBy },
+        {
+            $pull: {
+                examsCreated: { $in: exam._id }
+            }
+        },
+        {
+            new: true,
+        }
+    )
+
+    res.status(StatusCodes.OK).json({ user: updatedExaminer, msg: "success" })
+}
+
 module.exports = {
     createExam,
+    getExams,
+    deleteExam
 }

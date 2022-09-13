@@ -97,7 +97,7 @@ ExaminerSchema.methods.sendVerificationEmail = async function (token) {
         from: process.env.SERVER_EMAIL,
         to: this.email,
         subject: 'Welcome, Please Verify Your Email',
-        html: `https://localhost:3000/activate/${token}`
+        html: `http://localhost:3000/activate/${this.userType}/${token}`
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
