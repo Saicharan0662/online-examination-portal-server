@@ -22,6 +22,18 @@ const getExams = async (req, res) => {
     res.status(StatusCodes.OK).json({ exams, msg: "success" });
 }
 
+const getSingleExam = async (req, res) => {
+    const exam = await Exam.find({ _id: req.params.id, createdBy: req.user.userID });
+    res.status(StatusCodes.OK).json({ exam, msg: "success" });
+}
+
+const updateExam = async (req, res) => {
+    const { id } = req.params;
+    const exam = await Exam.findOneAndUpdate({ _id: id, createdBy: req.user.userID }, req.body, { new: true, runValidators: true });
+    if (!exam) res.status(StatusCodes.NOT_FOUND).json({ msg: "Exam not found" });
+    res.status(StatusCodes.OK).json({ exam, msg: "success" });
+}
+
 const deleteExam = async (req, res) => {
     const exam = await Exam.findByIdAndDelete({ _id: req.params.id });
     const updatedExaminer = await Examiner.updateMany(
@@ -42,5 +54,7 @@ const deleteExam = async (req, res) => {
 module.exports = {
     createExam,
     getExams,
-    deleteExam
+    deleteExam,
+    getSingleExam,
+    updateExam
 }
