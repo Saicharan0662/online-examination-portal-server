@@ -51,10 +51,38 @@ const deleteExam = async (req, res) => {
     res.status(StatusCodes.OK).json({ user: updatedExaminer, msg: "success" })
 }
 
+const getAllExamsForStudent = async (req, res) => {
+    const exams = await Exam.aggregate([
+        {
+            $lookup: {
+                from: "examiners",
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "examiner"
+            },
+        },
+        {
+            $project: {
+                createdBy: 0,
+                __v: 0,
+                "createdAt": 0,
+                "questions.answer": 0,
+                "examiner.password": 0,
+                "examiner.__v": 0,
+                "examiner.isActivated": 0,
+                "examiner.examsCreated": 0,
+            }
+        }
+    ]);
+
+    res.status(StatusCodes.OK).json({ exams, msg: "success" });
+}
+
 module.exports = {
     createExam,
     getExams,
     deleteExam,
     getSingleExam,
-    updateExam
+    updateExam,
+    getAllExamsForStudent
 }
