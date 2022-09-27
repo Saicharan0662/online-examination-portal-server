@@ -92,11 +92,19 @@ const getAllExamsForStudent = async (req, res) => {
     res.status(StatusCodes.OK).json({ exams, msg: "success" });
 }
 
+const registerStudent = async (req, res) => {
+    const { examID } = req.params;
+    const exam = await Exam.findByIdAndUpdate({ _id: examID }, { $push: { registeredStudents: req.user.userID } }, { new: true, runValidators: true });
+    const examiner = await Examiner.findByIdAndUpdate({ _id: exam.createdBy }, { $push: { regStudents: req.user.userID } }, { new: true, runValidators: true });
+    res.send({ msg: "success" });
+}
+
 module.exports = {
     createExam,
     getExams,
     deleteExam,
     getSingleExam,
     updateExam,
-    getAllExamsForStudent
+    getAllExamsForStudent,
+    registerStudent
 }

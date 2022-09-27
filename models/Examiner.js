@@ -38,7 +38,7 @@ const ExaminerSchema = mongoose.Schema({
         default: []
     },
     regStudents: {
-        type: [mongoose.Types.ObjectId],
+        type: Array,
         default: []
     }
 })
