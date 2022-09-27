@@ -2,6 +2,7 @@ const Exam = require('../models/Exam');
 const Examiner = require('../models/Examiner');
 const { UnauthenticatedError, BadRequestError } = require('../errors')
 const { StatusCodes } = require('http-status-codes');
+const mongoose = require('mongoose');
 
 const createExam = async (req, res) => {
     const { name, description, duration, topics, questions } = req.body;
@@ -71,6 +72,19 @@ const getAllExamsForStudent = async (req, res) => {
                 "examiner.__v": 0,
                 "examiner.isActivated": 0,
                 "examiner.examsCreated": 0,
+            }
+        },
+        {
+            $addFields: {
+                "isRegistered": {
+                    $in: [req.user.userID, "$registeredStudents"]
+                }
+            }
+        },
+        {
+            $sort: {
+                "isRegistered": -1,
+                "updatedAt": -1
             }
         }
     ]);

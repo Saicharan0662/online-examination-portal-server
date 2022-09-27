@@ -35,7 +35,10 @@ const ExamSchema = mongoose.Schema({
         answer: {
             type: String,
         },
-    }]
+    }],
+    registeredStudents: {
+        type: Array,
+    }
 }, { timestamps: true })
 
 module.exports = mongoose.model('Exam', ExamSchema);
