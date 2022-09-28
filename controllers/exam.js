@@ -92,6 +92,31 @@ const getAllExamsDataForStudent = async (req, res) => {
     res.status(StatusCodes.OK).json({ exams, msg: "success" });
 }
 
+const getExamForStudent = async (req, res) => {
+    const { examID } = req.params;
+    const exam = await Exam.aggregate([
+        {
+            $match: {
+                _id: mongoose.Types.ObjectId(examID)
+            }
+        },
+        {
+            $project: {
+                name: 1,
+                duration: 1,
+                questions: 1,
+            }
+        },
+        {
+            $project: {
+                "questions.answer": 0
+            }
+        }
+    ])
+
+    res.status(StatusCodes.OK).json({ exam, msg: "success" });
+}
+
 const registerStudent = async (req, res) => {
     const { examID } = req.params;
     const exam = await Exam.findByIdAndUpdate({ _id: examID }, { $push: { registeredStudents: req.user.userID } }, { new: true, runValidators: true });
@@ -106,5 +131,6 @@ module.exports = {
     getSingleExam,
     updateExam,
     getAllExamsDataForStudent,
+    getExamForStudent,
     registerStudent
 }
