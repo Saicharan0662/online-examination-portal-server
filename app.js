@@ -7,6 +7,7 @@ const app = express();
 const connectDB = require('./db/connect');
 const authRoute = require('./routes/auth');
 const examRoute = require('./routes/exam');
+const resultRoute = require('./routes/result');
 const authMiddleware = require('./middleware/authentication');
 const ErrorHandlerMiddleware = require('./middleware/error-handler');
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/exam', authMiddleware, examRoute);
+app.use('/api/v1/result', authMiddleware, resultRoute);
 app.use(ErrorHandlerMiddleware)
 
 const start = async () => {
