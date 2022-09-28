@@ -52,7 +52,7 @@ const deleteExam = async (req, res) => {
     res.status(StatusCodes.OK).json({ user: updatedExaminer, msg: "success" })
 }
 
-const getAllExamsForStudent = async (req, res) => {
+const getAllExamsDataForStudent = async (req, res) => {
     const exams = await Exam.aggregate([
         {
             $lookup: {
@@ -67,7 +67,7 @@ const getAllExamsForStudent = async (req, res) => {
                 createdBy: 0,
                 __v: 0,
                 "createdAt": 0,
-                "questions.answer": 0,
+                "questions": 0,
                 "examiner.password": 0,
                 "examiner.__v": 0,
                 "examiner.isActivated": 0,
@@ -105,6 +105,6 @@ module.exports = {
     deleteExam,
     getSingleExam,
     updateExam,
-    getAllExamsForStudent,
+    getAllExamsDataForStudent,
     registerStudent
 }
