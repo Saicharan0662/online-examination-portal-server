@@ -1,6 +1,7 @@
 const Result = require('../models/Result');
 const Exam = require('../models/Exam');
 const { StatusCodes } = require('http-status-codes');
+const { default: mongoose } = require('mongoose');
 
 const getResult = async (req, res) => {
     const { response } = req.body;
@@ -28,6 +29,51 @@ const getResult = async (req, res) => {
     res.status(StatusCodes.OK).send({ result, msg: "success" })
 }
 
+const getSingleResult = async (req, res) => {
+    const { resultID } = req.params;
+
+    const result = await Result.aggregate([
+        {
+            $match: {
+                _id: mongoose.Types.ObjectId(resultID)
+            }
+        },
+        {
+            $addFields: {
+                "examId": {
+                    "$toObjectId": "$examID"
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: "exams",
+                localField: "examId",
+                foreignField: "_id",
+                as: "examDetails"
+            },
+        },
+        {
+            $project: {
+                "examDetails.questions": 1,
+                "examDetails.description": 1,
+                "examDetails.name": 1,
+                "examDetails.duration": 1,
+                "examDetails._v": 1,
+                "_v": 1,
+                "examID": 1,
+                "studentID": 1,
+                "response": 1,
+                "score": 1,
+                "createdAt": 1,
+            }
+        }
+    ])
+
+    res.status(StatusCodes.OK).send({ result, msg: "success" })
+}
+
 module.exports = {
-    getResult
+    getResult,
+    getSingleResult
 }
