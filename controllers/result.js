@@ -11,7 +11,7 @@ const getResult = async (req, res) => {
     let index = 0;
     for (let question of exam[0].questions) {
         if (question._id.toString() === response.response[index].questionID) {
-            if (response.response[index++].givenAnswer === question.answer) {
+            if (response.response && (response.response[index++].givenAnswer === question.answer)) {
                 score = score + 1;
             }
         }
