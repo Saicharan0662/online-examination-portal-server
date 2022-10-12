@@ -38,8 +38,6 @@ const getResultForOneStudent = async (req, res) => {
                 studentID: studentID
             }
         },
-        { $group: { _id: null, examID: { $addToSet: "$examID" } } },
-        { $unwind: "$examID" },
         {
             $addFields: {
                 "examId": {
@@ -52,34 +50,33 @@ const getResultForOneStudent = async (req, res) => {
                 from: "exams",
                 localField: "examId",
                 foreignField: "_id",
-                as: 'results'
+                as: 'exams'
+            }
+        },
+        {
+            $project: {
+                "response": 0,
+                "studentID": 0,
+                "__v": 0,
+                "exams.questions": 0,
+                "exams.__v": 0,
+                "exams.registeredStudents": 0,
+                "exams.duration": 0,
+                "exams._id": 0,
+                "exams.createdBy": 0,
+                "exams.createdAt": 0,
+                "exams.updatedAt": 0,
             }
         },
         {
             $group: {
                 _id: "$examID",
-                exam: {
-                    $push: {
-                        examID: "$examID",
-                        score: "$score",
-                        examDetails: "$results",
-                    }
-                }
-            }
-        },
-        {
-            $unwind: "$exam",
-        },
-        {
-            $unwind: "$exam.examDetails",
-        },
-        {
-            $project: {
-                "exam.examDetails.questions": 0,
-                "exam.examDetails.duration": 0,
-                "exam.examDetails.description": 0,
-                "exam.examDetails.registeredStudents": 0,
-                "exam.examDetails.createdBy": 0,
+                "resultID": { $first: "$_id" },
+                "score": { $max: "$score" },
+                "updatedAt": { $first: "$updatedAt" },
+                "createdAt": { $first: "$createdAt" },
+                "exams": { $first: "$exams" },
+                count: { $sum: 1 },
             }
         }
     ])
