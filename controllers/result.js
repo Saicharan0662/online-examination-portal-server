@@ -29,6 +29,64 @@ const getResult = async (req, res) => {
     res.status(StatusCodes.OK).send({ result, msg: "success" })
 }
 
+const getResultForOneStudent = async (req, res) => {
+    const { studentID } = req.params;
+
+    const results = await Result.aggregate([
+        {
+            $match: {
+                studentID: studentID
+            }
+        },
+        { $group: { _id: null, examID: { $addToSet: "$examID" } } },
+        { $unwind: "$examID" },
+        {
+            $addFields: {
+                "examId": {
+                    "$toObjectId": "$examID"
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: "exams",
+                localField: "examId",
+                foreignField: "_id",
+                as: 'results'
+            }
+        },
+        {
+            $group: {
+                _id: "$examID",
+                exam: {
+                    $push: {
+                        examID: "$examID",
+                        score: "$score",
+                        examDetails: "$results",
+                    }
+                }
+            }
+        },
+        {
+            $unwind: "$exam",
+        },
+        {
+            $unwind: "$exam.examDetails",
+        },
+        {
+            $project: {
+                "exam.examDetails.questions": 0,
+                "exam.examDetails.duration": 0,
+                "exam.examDetails.description": 0,
+                "exam.examDetails.registeredStudents": 0,
+                "exam.examDetails.createdBy": 0,
+            }
+        }
+    ])
+
+    res.status(StatusCodes.OK).send({ results, msg: "success" })
+}
+
 const getSingleResult = async (req, res) => {
     const { resultID } = req.params;
 
@@ -75,5 +133,6 @@ const getSingleResult = async (req, res) => {
 
 module.exports = {
     getResult,
-    getSingleResult
+    getSingleResult,
+    getResultForOneStudent
 }
