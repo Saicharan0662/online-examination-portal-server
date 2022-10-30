@@ -35,6 +35,9 @@ const ExamSchema = mongoose.Schema({
         answer: {
             type: String,
         },
+        image: {
+            type: String,
+        },
     }],
     registeredStudents: {
         type: Array,
