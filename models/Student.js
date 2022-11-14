@@ -74,7 +74,14 @@ StudentSchema.methods.sendResetPasswordEmail = async function (token) {
         from: process.env.SERVER_EMAIL,
         to: this.email,
         subject: 'Reset your password',
-        html: `http://localhost:3000/reset-password/${token}`
+        html: `
+        <p>Click on the link below to reset your password</p>
+        <br/>
+        <a href='http://localhost:3000/reset-password/${token}'>reset password</a>
+        <br/><br/>
+        <p>Thank you.</p>
+        <p>Team OEP</p>
+        `
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
@@ -100,7 +107,14 @@ StudentSchema.methods.sendVerificationEmail = async function (token) {
         from: process.env.SERVER_EMAIL,
         to: this.email,
         subject: 'Welcome, Please Verify Your Email',
-        html: `http://localhost:3000/activate/${this.userType}/${token}`
+        html: `
+        <p>Click on the link below to verify your email address and activate your account.</p>
+        <br/>
+        <a href='http://localhost:3000/activate/${this.userType}/${token}'>activate account</a>
+        <br/><br/>
+        <p>Thank you.</p>
+        <p>Team OEP</p>
+        `
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
