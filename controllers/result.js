@@ -1,8 +1,9 @@
 const Result = require('../models/Result');
 const Exam = require('../models/Exam');
 const Examiner = require('../models/Examiner')
+const Student = require('../models/Student');
 const { StatusCodes } = require('http-status-codes');
-const { default: mongoose } = require('mongoose');
+const { default: mongoose, mongo } = require('mongoose');
 
 const getResult = async (req, res) => {
     const { response } = req.body;
@@ -189,39 +190,59 @@ const getTotalStudentExams = async (req, res) => {
 const studentResultForExaminer = async (req, res) => {
     const { examinerID } = req.params;
 
-    const results = await Exam.aggregate([
+    const tempResult = await Examiner.aggregate([
         {
             $match: {
-                createdBy: mongoose.Types.ObjectId(examinerID)
-            }
+                _id: mongoose.Types.ObjectId(examinerID)
+            },
         },
         {
             $project: {
-                "questions": 0,
-                "createdAt": 0,
-                "__v": 0,
-                "registeredStudents": 0,
+                "_id": 0,
+                "examsCreated": 1
+            }
+        }
+    ])
 
+    let examIDs = tempResult[0].examsCreated;
+    if (examIDs.length === 0) {
+        res.status(StatusCodes.OK).send({ results: [], msg: "success" })
+    }
+
+    for (let i = 0; i < examIDs.length; i++) {
+        examIDs[i] = examIDs[i].toString();
+    }
+
+    const results = await Result.aggregate([
+        {
+            $match: {
+                examID: { $in: examIDs }
             }
         },
         {
             $addFields: {
-                "examID": {
-                    "$toString": "$_id"
+                "studentID": {
+                    "$toObjectId": "$studentID"
                 }
             }
         },
         {
             $lookup: {
-                from: "results",
-                localField: "examID",
-                foreignField: "examID",
-                as: "studentResults"
+                from: "students",
+                localField: "studentID",
+                foreignField: "_id",
+                as: "studentDetails"
             }
         },
         {
-            $match: {
-                "studentResults": { $ne: [] }
+            $project: {
+                "response": 0,
+                "__v": 0,
+                "studentDetails.password": 0,
+                "studentDetails.__v": 0,
+                "studentDetails.exams": 0,
+                "studentDetails.isActivated": 0,
+                "createdAt": 0,
             }
         }
     ])
