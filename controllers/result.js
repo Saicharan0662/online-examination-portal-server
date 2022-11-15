@@ -1,5 +1,6 @@
 const Result = require('../models/Result');
 const Exam = require('../models/Exam');
+const Examiner = require('../models/Examiner')
 const { StatusCodes } = require('http-status-codes');
 const { default: mongoose } = require('mongoose');
 
@@ -185,9 +186,53 @@ const getTotalStudentExams = async (req, res) => {
     res.status(StatusCodes.OK).send({ results, msg: "success" })
 }
 
+const studentResultForExaminer = async (req, res) => {
+    const { examinerID } = req.params;
+
+    const results = await Exam.aggregate([
+        {
+            $match: {
+                createdBy: mongoose.Types.ObjectId(examinerID)
+            }
+        },
+        {
+            $project: {
+                "questions": 0,
+                "createdAt": 0,
+                "__v": 0,
+                "registeredStudents": 0,
+
+            }
+        },
+        {
+            $addFields: {
+                "examID": {
+                    "$toString": "$_id"
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: "results",
+                localField: "examID",
+                foreignField: "examID",
+                as: "studentResults"
+            }
+        },
+        {
+            $match: {
+                "studentResults": { $ne: [] }
+            }
+        }
+    ])
+
+    res.send({ results, msg: "success" })
+}
+
 module.exports = {
     getResult,
     getSingleResult,
     getResultForOneStudent,
-    getTotalStudentExams
+    getTotalStudentExams,
+    studentResultForExaminer
 }
