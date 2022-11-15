@@ -235,14 +235,35 @@ const studentResultForExaminer = async (req, res) => {
             }
         },
         {
+            $addFields: {
+                "examID": {
+                    "$toObjectId": "$examID"
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: "exams",
+                localField: "examID",
+                foreignField: "_id",
+                as: "examDetails"
+            }
+        },
+        {
             $project: {
                 "response": 0,
                 "__v": 0,
+                "updatedAt": 0,
                 "studentDetails.password": 0,
                 "studentDetails.__v": 0,
                 "studentDetails.exams": 0,
                 "studentDetails.isActivated": 0,
-                "createdAt": 0,
+                "examDetails.questions": 0,
+                "examDetails.createdBy": 0,
+                "examDetails.createdAt": 0,
+                "examDetails.updatedAt": 0,
+                "examDetails.__v": 0,
+                "examDetails.registeredStudents": 0,
             }
         }
     ])
