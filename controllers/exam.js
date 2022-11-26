@@ -28,6 +28,20 @@ const getSingleExam = async (req, res) => {
     res.status(StatusCodes.OK).json({ exam, msg: "success" });
 }
 
+const getFilteredExam = async (req, res) => {
+    const { topics } = req.body;
+
+    const exams = await Exam.aggregate([
+        {
+            $match: {
+                topics: { $in: topics }
+            }
+        },
+    ]);
+
+    res.status(StatusCodes.OK).json({ exams, msg: "success" });
+}
+
 const updateExam = async (req, res) => {
     const { id } = req.params;
     const exam = await Exam.findOneAndUpdate({ _id: id, createdBy: req.user.userID }, req.body, { new: true, runValidators: true });
@@ -132,5 +146,6 @@ module.exports = {
     updateExam,
     getAllExamsDataForStudent,
     getExamForStudent,
-    registerStudent
+    registerStudent,
+    getFilteredExam
 }
