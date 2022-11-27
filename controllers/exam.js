@@ -29,14 +29,47 @@ const getSingleExam = async (req, res) => {
 }
 
 const getFilteredExam = async (req, res) => {
-    const { topics } = req.body;
-
+    let { topics } = req.params;
+    topics = topics.split(',');
     const exams = await Exam.aggregate([
         {
             $match: {
                 topics: { $in: topics }
             }
         },
+        {
+            $lookup: {
+                from: "examiners",
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "examiner"
+            },
+        },
+        {
+            $project: {
+                createdBy: 0,
+                __v: 0,
+                "createdAt": 0,
+                "questions": 0,
+                "examiner.password": 0,
+                "examiner.__v": 0,
+                "examiner.isActivated": 0,
+                "examiner.examsCreated": 0,
+            }
+        },
+        {
+            $addFields: {
+                "isRegistered": {
+                    $in: [req.user.userID, "$registeredStudents"]
+                }
+            }
+        },
+        {
+            $sort: {
+                "isRegistered": -1,
+                "updatedAt": -1
+            }
+        }
     ]);
 
     res.status(StatusCodes.OK).json({ exams, msg: "success" });
