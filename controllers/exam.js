@@ -5,12 +5,12 @@ const { StatusCodes } = require('http-status-codes');
 const mongoose = require('mongoose');
 
 const createExam = async (req, res) => {
-    const { name, description, duration, topics, questions, image } = req.body;
+    const { name, description, duration, topics, questions, image, time } = req.body;
 
-    if (!name || !description || !duration || !topics || !questions)
+    if (!name || !description || !duration || !topics || !questions || !time)
         throw new BadRequestError("Please provide the required fields");
 
-    const exam = await Exam.create({ name, description, duration, topics, questions, createdBy: req.user.userID, image });
+    const exam = await Exam.create({ name, description, duration, topics, questions, createdBy: req.user.userID, image, time });
     const examiner = await Examiner.findByIdAndUpdate({ _id: req.user.userID },
         { $push: { examsCreated: exam._id } },
         { new: true, runValidators: true });

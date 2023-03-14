@@ -41,6 +41,10 @@ const ExamSchema = mongoose.Schema({
     }],
     registeredStudents: {
         type: Array,
+    },
+    time: {
+        type: Date,
+        required: [true, 'Please provide a time of exam'],
     }
 }, { timestamps: true })
 
