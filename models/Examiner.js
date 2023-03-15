@@ -40,6 +40,10 @@ const ExaminerSchema = mongoose.Schema({
     regStudents: {
         type: Array,
         default: []
+    },
+    dedicatedRoomID: {
+        type: String,
+        default: Math.random().toString(36).substring(2, 8)
     }
 })
 

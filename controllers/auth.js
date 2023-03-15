@@ -66,7 +66,7 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign({ userID: user._id, email, password }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_LIFETIME })
-    res.status(StatusCodes.OK).json({ user: { userID: user._id, name: user.name, email: user.email, userType: user.userType }, token })
+    res.status(StatusCodes.OK).json({ user: { userID: user._id, name: user.name, email: user.email, userType: user.userType, dedicatedRoomID: user.dedicatedRoomID }, token })
 }
 
 const forgotPassword = async (req, res) => {

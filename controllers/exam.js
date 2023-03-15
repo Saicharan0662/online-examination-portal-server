@@ -141,6 +141,30 @@ const getAllExamsDataForStudent = async (req, res) => {
 
 const getExamForStudent = async (req, res) => {
     const { examID } = req.params;
+    const roomIDObj = await Exam.aggregate([
+        {
+            $match: {
+                _id: mongoose.Types.ObjectId(examID)
+            }
+        },
+        {
+            $project: {
+                "createdBy": 1,
+                "_id": 0,
+            }
+        },
+        {
+            $lookup: {
+                from: "examiners",
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "examiner"
+            }
+        },
+    ])
+
+    const roomID = roomIDObj[0].examiner[0].dedicatedRoomID;
+
     const exam = await Exam.aggregate([
         {
             $match: {
@@ -161,7 +185,7 @@ const getExamForStudent = async (req, res) => {
         }
     ])
 
-    res.status(StatusCodes.OK).json({ exam, msg: "success" });
+    res.status(StatusCodes.OK).json({ exam, roomID, msg: "success" });
 }
 
 const registerStudent = async (req, res) => {
