@@ -28,6 +28,29 @@ const getSingleExam = async (req, res) => {
     res.status(StatusCodes.OK).json({ exam, msg: "success" });
 }
 
+const getSingleExamMetaInfo = async (req, res) => {
+    const { examID } = req.params;
+    const exam = await Exam.aggregate([
+        {
+            $match: {
+                _id: mongoose.Types.ObjectId(examID)
+            }
+        },
+        {
+            $project: {
+                name: 1,
+                description: 1,
+                topics: 1,
+                duration: 1,
+                time: 1,
+                updatedAt: 1,
+            }
+        }
+    ])
+
+    res.status(StatusCodes.OK).json({ exam, msg: "success" });
+}
+
 const getFilteredExam = async (req, res) => {
     let { topics } = req.params;
     topics = topics.split(',');
@@ -204,5 +227,6 @@ module.exports = {
     getAllExamsDataForStudent,
     getExamForStudent,
     registerStudent,
-    getFilteredExam
+    getFilteredExam,
+    getSingleExamMetaInfo
 }
